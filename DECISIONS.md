@@ -51,3 +51,9 @@ When an actuarial product can naturally be represented as a combination of simpl
 Version 1 will focus on annual discrete actuarial calculations.
 
 Fractional-year calculations and assumptions will be introduced in a later version, initially planned for Version 1.1.
+
+## 8. Licensing
+
+The project will be released under the MIT License, allowing reuse, modification, distribution, and commercial use, provided that the copyright and license notices are preserved.
+
+**Rationale:** A permissive license is consistent with the project's portfolio and open-source goals while preserving the author's copyrigh
