@@ -47,3 +47,9 @@ The first stage focuses on annual discrete calculations.
 Future iterations are expected to introduce fractional-year calculations, variable benefits and premiums, reserves, pricing components, and additional life insurance products.
 
 The scope will evolve gradually as the actuarial engine becomes more complete.
+
+## Mortality data
+
+The initial mortality tables are based on male and female 1980 CSO tables provided as university course material.
+
+These files have not been independently verified against an official Society of Actuaries dataset and should not be assumed to reproduce an SOA-published version exactly.
