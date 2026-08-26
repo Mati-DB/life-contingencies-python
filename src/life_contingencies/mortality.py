@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 def load_mortality_table(data_path):
     """Load a mortality table from a CSV file and normalize its 
     structure.
@@ -28,7 +27,7 @@ def build_life_table(mortality_table, radix=10_000_000):
     Parameters
     ----------
     mortality_table : pandas.DataFrame
-        Mortality table indexed by age and containing a 'qx' column.
+        Mortality table indexed by age and containing a ``qx`` column.
     radix : int, default=10_000_000
         Initial number of lives at age 0.
         
@@ -37,10 +36,10 @@ def build_life_table(mortality_table, radix=10_000_000):
     pandas.DataFrame
         Life table with the following columns:
 
-        - 'qx': probability of death between ages x and x + 1.
-        - 'px': probability of survival from age x to age x + 1.
-        - 'lx': number of lives surviving to exact age x.
-        - 'dx': number of deaths between ages x and x + 1.
+        - ``qx``: probability of death between ages x and x + 1.
+        - ``px``: probability of survival from age x to age x + 1.
+        - ``lx``: number of lives surviving to exact age x.
+        - ``dx``: number of deaths between ages x and x + 1.
     """
     life_table = mortality_table.copy()
     life_table.loc[:, 'px'] = 1 - life_table.loc[:, 'qx']
@@ -57,3 +56,62 @@ def build_life_table(mortality_table, radix=10_000_000):
     
     return life_table
 
+
+def build_commutation_table(life_table, interest_rate=0.04):
+    """Build a commutation table from a life table.
+    
+    Parameters
+    ----------
+    life_table : pandas.DataFrame
+        Life table indexed by age and containing ``lx`` and ``dx`` columns.
+    interest_rate : float, default=0.04
+        Annual effective interest rate used to calculate commutation 
+        functions.
+        
+    Returns
+    -------
+    pandas.DataFrame
+        Copy of the life table with the following commutation-function
+    columns added:
+
+        - ``Dx``: discounted number of survivors to exact age x, 
+        calculated as v^x * lx.
+        - ``Nx``: cumulative sum of ``Dx`` values from age x to the 
+        limiting age.
+        - ``Sx``: cumulative sum of ``Nx`` values from age x to the 
+        limiting age.
+        - ``Cx``: discounted number of deaths between ages x and x + 1, 
+        calculated as v^(x + 1) * dx.
+        - ``Mx``: cumulative sum of ``Cx`` values from age x to the 
+        limiting age.
+        - ``Rx``: cumulative sum of ``Mx`` values from age x to the 
+        limiting age.
+    """
+    commutation_table = life_table.copy()
+    v = 1 / (1 + interest_rate)
+    
+    commutation_table.loc[:, 'Dx'] = (
+        v ** commutation_table.index * commutation_table.loc[:, 'lx']
+    )
+    
+    commutation_table.loc[:, 'Nx'] = (
+        commutation_table['Dx'].loc[::-1].cumsum().loc[::-1]
+    )
+    
+    commutation_table.loc[:, 'Sx'] = (
+        commutation_table['Nx'].loc[::-1].cumsum().loc[::-1]
+    )
+    commutation_table.loc[:, 'Cx'] = (
+        v ** (commutation_table.index + 1) 
+        * commutation_table.loc[:, 'dx']
+    )
+    
+    commutation_table.loc[:, 'Mx'] = (
+        commutation_table['Cx'].loc[::-1].cumsum().loc[::-1]
+    )
+
+    commutation_table.loc[:, 'Rx'] = (
+        commutation_table['Mx'].loc[::-1].cumsum().loc[::-1]
+    )
+    
+    return commutation_table
