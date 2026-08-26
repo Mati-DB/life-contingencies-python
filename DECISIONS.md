@@ -26,6 +26,14 @@ Python will be responsible for loading, validating, and transforming mortality d
 
 Mortality tables generated from mortality laws or models may instead be created programmatically.
 
+### Canonical mortality input
+
+Internal actuarial calculations will operate on a normalized mortality table with a defined structure. Source-specific parsing and normalization will be handled before actuarial calculations rather than embedded in them.
+
+### Incremental tabular representation
+
+Mortality, life, and commutation tables will initially be represented as successive enriched tables. Some duplication of derived columns is accepted in favor of clarity and inspectability.
+
 ## 4. Mortality and interest assumptions
 
 The initial mortality basis will use the 1980 CSO male and female mortality tables.
