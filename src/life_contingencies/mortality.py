@@ -1,7 +1,8 @@
 import pandas as pd
 
+
 def load_mortality_table(data_path):
-    """Load a mortality table from a CSV file and normalize its 
+    """Load a mortality table from a CSV file and normalize its
     structure.
 
     Parameters
@@ -12,7 +13,7 @@ def load_mortality_table(data_path):
     Returns
     -------
     pandas.DataFrame
-        Mortality table indexed by integer ages with normalized column 
+        Mortality table indexed by integer ages with normalized column
         names.
     """
     mortality_table = pd.read_csv(data_path, index_col=0)
@@ -23,7 +24,7 @@ def load_mortality_table(data_path):
 
 def build_life_table(mortality_table, radix=10_000_000):
     """Build a life table from mortality probabilities.
-    
+
     Parameters
     ----------
     mortality_table : pandas.DataFrame
@@ -31,7 +32,7 @@ def build_life_table(mortality_table, radix=10_000_000):
         starting at age 0, and containing a ``qx`` column.
     radix : int, default=10_000_000
         Initial number of lives at age 0. Must be positive.
-        
+
     Returns
     -------
     pandas.DataFrame
@@ -41,30 +42,30 @@ def build_life_table(mortality_table, radix=10_000_000):
         - ``px``: probability of survival from age x to age x + 1.
         - ``lx``: number of lives surviving to exact age x.
         - ``dx``: number of deaths between ages x and x + 1.
-    
+
     Notes
     -----
     The current implementation assumes consecutive integer ages.
     """
     life_table = mortality_table.copy()
     life_table.loc[:, 'px'] = 1 - life_table.loc[:, 'qx']
-    
+
     life_table.loc[0, 'lx'] = radix
     for x in life_table.index[1:]:
         life_table.loc[x, 'lx'] = (
             life_table.loc[x - 1, 'lx'] * life_table.loc[x - 1, 'px']
         )
-        
+
     life_table.loc[:, 'dx'] = (
         life_table.loc[:, 'lx'] * life_table.loc[:, 'qx']
         )
-    
+
     return life_table
 
 
 def build_commutation_table(life_table, interest_rate=0.04):
     """Build a commutation table from a life table.
-    
+
     Parameters
     ----------
     life_table : pandas.DataFrame
@@ -73,7 +74,7 @@ def build_commutation_table(life_table, interest_rate=0.04):
     interest_rate : float, default=0.04
         Annual effective interest rate used to calculate commutation
         functions. Must be non-negative.
-        
+
     Returns
     -------
     pandas.DataFrame
@@ -92,7 +93,7 @@ def build_commutation_table(life_table, interest_rate=0.04):
         limiting age.
         - ``Rx``: cumulative sum of ``Mx`` values from age x to the
         limiting age.
-    
+
     Notes
     -----
     The life table is assumed to be ordered by increasing age because
@@ -101,7 +102,7 @@ def build_commutation_table(life_table, interest_rate=0.04):
     """
     commutation_table = life_table.copy()
     v = 1 / (1 + interest_rate)
-    
+
     commutation_table.loc[:, 'Dx'] = (
         v ** commutation_table.index * commutation_table.loc[:, 'lx']
     )
@@ -111,7 +112,7 @@ def build_commutation_table(life_table, interest_rate=0.04):
     commutation_table.loc[:, 'Sx'] = (
         commutation_table['Nx'].loc[::-1].cumsum().loc[::-1]
     )
-    
+
     commutation_table.loc[:, 'Cx'] = (
         v ** (commutation_table.index + 1)
         * commutation_table.loc[:, 'dx']
@@ -122,5 +123,5 @@ def build_commutation_table(life_table, interest_rate=0.04):
     commutation_table.loc[:, 'Rx'] = (
         commutation_table['Mx'].loc[::-1].cumsum().loc[::-1]
     )
-    
+
     return commutation_table
