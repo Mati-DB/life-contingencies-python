@@ -1,3 +1,8 @@
+"""
+This module provides functions for interest rate equivalence
+calculations.
+"""
+
 import math
 
 

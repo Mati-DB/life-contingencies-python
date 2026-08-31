@@ -1,3 +1,7 @@
+"""
+Functions for loading mortality data and building actuarial tables.
+"""
+
 import pandas as pd
 
 
