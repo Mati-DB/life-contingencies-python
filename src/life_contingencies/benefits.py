@@ -40,3 +40,19 @@ def life_annuity_immediate(
     current_Dx = commutation_table.loc[current_age, 'Dx']
 
     return (deferred_Nx - terminal_Nx) / current_Dx
+
+
+def term_life_insurance(
+    current_age: int,
+    term: int,
+    commutation_table: pd.DataFrame,
+    deferral_period: int = 0,
+) -> float:
+    deferred_Mx = commutation_table.loc[
+        current_age + deferral_period, 'Mx']
+    terminal_Mx = commutation_table.loc[
+        current_age + deferral_period + term, 'Mx']
+    current_Dx = commutation_table.loc[
+        current_age, 'Dx']
+    
+    return (deferred_Mx - terminal_Mx) / current_Dx
