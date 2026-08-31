@@ -23,7 +23,17 @@ def life_annuity_due(
         current_age + payment_term + deferral_period, 'Nx']
     current_Dx = commutation_table.loc[current_age, 'Dx']
 
-    return (deferred_Nx - terminal_Nx) / current_Dx
+    omega = commutation_table.index[-1]
+    terminal_age = current_age + deferral_period + payment_term
+    # Commutation values beyond omega are treated as zero.
+    if terminal_age <= omega:
+        # Terminal benefit age within table bounds
+        premium = (deferred_Nx - terminal_Nx) / current_Dx
+    else:
+        # Terminal benefit age out of table bounds
+        premium = deferred_Nx / current_Dx
+        
+    return premium
 
 
 def life_annuity_immediate(
@@ -36,10 +46,17 @@ def life_annuity_immediate(
         current_age + deferral_period + 1, 'Nx']
     terminal_Nx = commutation_table.loc[
         current_age + deferral_period + payment_term + 1, 'Nx']
-
     current_Dx = commutation_table.loc[current_age, 'Dx']
 
-    return (deferred_Nx - terminal_Nx) / current_Dx
+    omega = commutation_table.index[-1]
+    terminal_age = current_age + deferral_period + payment_term
+    # Commutation values beyond omega are treated as zero.
+    if terminal_age <= omega:
+        premium = (deferred_Nx - terminal_Nx) / current_Dx
+    else:
+        premium = deferred_Nx / current_Dx
+        
+    return premium
 
 
 def term_life_insurance(
@@ -54,5 +71,13 @@ def term_life_insurance(
         current_age + deferral_period + term, 'Mx']
     current_Dx = commutation_table.loc[
         current_age, 'Dx']
+
+    omega = commutation_table.index[-1]
+    terminal_age = current_age + deferral_period + term
+    # Commutation values beyond omega are treated as zero.
+    if terminal_age <= omega:
+        premium = (deferred_Mx - terminal_Mx) / current_Dx
+    else:
+        premium = deferred_Mx / current_Dx
     
-    return (deferred_Mx - terminal_Mx) / current_Dx
+    return premium
