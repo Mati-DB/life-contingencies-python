@@ -52,8 +52,10 @@ def life_annuity_immediate(
     terminal_age = current_age + deferral_period + payment_term
     # Commutation values beyond omega are treated as zero.
     if terminal_age <= omega:
+        # Terminal benefit age within table bounds
         premium = (deferred_Nx - terminal_Nx) / current_Dx
     else:
+        # Terminal benefit age out of table bounds
         premium = deferred_Nx / current_Dx
         
     return premium
@@ -76,8 +78,10 @@ def term_life_insurance(
     terminal_age = current_age + deferral_period + term
     # Commutation values beyond omega are treated as zero.
     if terminal_age <= omega:
+        # Terminal benefit age within table bounds
         premium = (deferred_Mx - terminal_Mx) / current_Dx
     else:
+        # Terminal benefit age out of table bounds
         premium = deferred_Mx / current_Dx
     
     return premium
