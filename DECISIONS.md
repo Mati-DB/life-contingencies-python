@@ -54,6 +54,18 @@ Only the commutation functions required by the implemented calculations will be 
 
 When an actuarial product can naturally be represented as a combination of simpler actuarial benefits, the implementation should prefer composing those existing components rather than introducing independent duplicated calculation logic.
 
+### Composable actuarial API
+
+The package will prioritize reusable actuarial benefits, premium patterns, and valuation functions that users can combine to model products.
+
+Standard products may be provided as convenience functions when they represent common and well-defined compositions, but the package will not attempt to encode every possible insurance plan as a separate implementation.
+
+### Premium patterns
+
+Premium calculations will be modeled independently from insurance benefits.
+
+The package will support single, level, limited-payment, and variable premium patterns, including arithmetic and geometric progressions, so that the same actuarial benefit can be financed under different premium structures.
+
 ## 7. Version 1 calculation basis
 
 Version 1 will focus on annual discrete actuarial calculations.
