@@ -6,10 +6,28 @@ def pure_endowment(
     term: int,
     commutation_table: pd.DataFrame,
 ) -> float:
-    terminal_Dx = commutation_table.loc[current_age + term, 'Dx']
-    current_Dx = commutation_table.loc[current_age, 'Dx']
+    if current_age not in commutation_table.index:
+        raise ValueError(
+            "current_age must be a valid age in the commutation table."
+        )
+    current_Dx = commutation_table.loc[current_age, "Dx"]
 
-    return terminal_Dx / current_Dx
+    if term < 0:
+        raise ValueError("term must be a non-negative integer.")
+
+    terminal_age = current_age + term
+    omega = commutation_table.index[-1] + 1
+    if terminal_age > omega:
+        raise ValueError(
+            "Terminal age cannot exceed the limiting age."
+        )
+
+    if terminal_age == omega:
+        terminal_Dx = 0
+    else:
+        terminal_Dx = commutation_table.loc[current_age + term, "Dx"]
+
+    return float(terminal_Dx / current_Dx)
 
 
 def life_annuity_due(
@@ -32,7 +50,7 @@ def life_annuity_due(
     else:
         # Terminal benefit age out of table bounds
         premium = deferred_Nx / current_Dx
-        
+
     return premium
 
 
@@ -57,7 +75,7 @@ def life_annuity_immediate(
     else:
         # Terminal benefit age out of table bounds
         premium = deferred_Nx / current_Dx
-        
+
     return premium
 
 
@@ -83,5 +101,5 @@ def term_life_insurance(
     else:
         # Terminal benefit age out of table bounds
         premium = deferred_Mx / current_Dx
-    
+
     return premium
