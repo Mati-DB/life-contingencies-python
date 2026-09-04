@@ -172,7 +172,7 @@ def term_life_insurance(
             "terminal age."
         )
     deferred_Mx = commutation_table.loc[deferred_age, 'Mx']
-    
+
     if term in None:
         terminal_Mx = 0
     else:
@@ -181,18 +181,18 @@ def term_life_insurance(
             raise ValueError(
                 "Payment term must be a positive integer."
             )
-        
+
         # terminal age validation
         terminal_age = deferred_age + term
         if terminal_age > omega:
-                    raise ValueError(
-                        "Terminal age cannot exceed the mortality model's "
-                        "terminal age."
-                    )
-        
+            raise ValueError(
+                "Terminal age cannot exceed the mortality model's "
+                "terminal age."
+            )
+
         if terminal_age == omega:
             terminal_Mx = 0
         else:
             terminal_Mx = commutation_table.loc[terminal_age, 'Mx']
-            
+
     return float((deferred_Mx - terminal_Mx) / current_Dx)
