@@ -94,7 +94,7 @@ def life_annuity_immediate(
 ) -> float:
     omega = commutation_table.index[-1] + 1
 
-# current_age validation
+    # current_age validation
     if current_age not in commutation_table.index:
         raise ValueError(
             "Current age must be lower than the mortality model's "
@@ -127,7 +127,7 @@ def life_annuity_immediate(
             )
 
         # terminal age validation
-        terminal_age = deferred_age + payment_term + 1
+        terminal_age = current_age + deferral_period + payment_term + 1
         if terminal_age > omega:
             raise ValueError(
                 "Terminal age cannot exceed the mortality model's "
@@ -144,25 +144,55 @@ def life_annuity_immediate(
 
 def term_life_insurance(
     current_age: int,
-    term: int,
+    term: int | None,
     commutation_table: pd.DataFrame,
     deferral_period: int = 0,
 ) -> float:
-    deferred_Mx = commutation_table.loc[
-        current_age + deferral_period, 'Mx']
-    terminal_Mx = commutation_table.loc[
-        current_age + deferral_period + term, 'Mx']
-    current_Dx = commutation_table.loc[
-        current_age, 'Dx']
+    omega = commutation_table.index[-1] + 1
 
-    omega = commutation_table.index[-1]
-    terminal_age = current_age + deferral_period + term
-    # Commutation values beyond omega are treated as zero.
-    if terminal_age <= omega:
-        # Terminal benefit age within table bounds
-        premium = (deferred_Mx - terminal_Mx) / current_Dx
+    # current_age validation
+    if current_age not in commutation_table.index:
+        raise ValueError(
+            "Current age must be lower than the mortality model's "
+            "terminal age."
+        )
+    current_Dx = commutation_table.loc[current_age, 'Dx']
+
+    # deferral_period validation
+    if deferral_period < 0:
+        raise ValueError(
+            "Deferral period must be a non-negative integer."
+        )
+
+    # deferred_age validation
+    deferred_age = current_age + deferral_period
+    if deferred_age >= omega:
+        raise ValueError(
+            "Deferred age cannot exceed the mortality model's "
+            "terminal age."
+        )
+    deferred_Mx = commutation_table.loc[deferred_age, 'Mx']
+    
+    if term in None:
+        terminal_Mx = 0
     else:
-        # Terminal benefit age out of table bounds
-        premium = deferred_Mx / current_Dx
-
-    return premium
+        # term validation
+        if term <= 0:
+            raise ValueError(
+                "Payment term must be a positive integer."
+            )
+        
+        # terminal age validation
+        terminal_age = deferred_age + term
+        if terminal_age > omega:
+                    raise ValueError(
+                        "Terminal age cannot exceed the mortality model's "
+                        "terminal age."
+                    )
+        
+        if terminal_age == omega:
+            terminal_Mx = 0
+        else:
+            terminal_Mx = commutation_table.loc[terminal_age, 'Mx']
+            
+    return float((deferred_Mx - terminal_Mx) / current_Dx)
