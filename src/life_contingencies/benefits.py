@@ -1,11 +1,20 @@
 import pandas as pd
 
 
+def _validate_integer_params(**params):
+    for name, value in params.items():
+        if type(value) is not int:
+            display_name = name.replace("_", " ").capitalize()
+            raise TypeError(f"{display_name} must be an integer.")
+
+
 def pure_endowment(
     current_age: int,
     term: int,
     commutation_table: pd.DataFrame,
 ) -> float:
+    _validate_integer_params(current_age=current_age, term=term)
+
     if current_age not in commutation_table.index:
         raise ValueError(
             "Current age must be a valid age in the commutation table."
@@ -38,6 +47,14 @@ def life_annuity_due(
     commutation_table: pd.DataFrame,
     deferral_period: int = 0,
 ) -> float:
+    _validate_integer_params(
+        current_age=current_age,
+        deferral_period=deferral_period,
+    )
+
+    if payment_term is not None:
+        _validate_integer_params(payment_term=payment_term)
+
     # The limiting age is one year beyond the last age in the table.
     omega = commutation_table.index[-1] + 1
 
@@ -88,6 +105,14 @@ def life_annuity_immediate(
     commutation_table: pd.DataFrame,
     deferral_period: int = 0,
 ) -> float:
+    _validate_integer_params(
+        current_age=current_age,
+        deferral_period=deferral_period,
+    )
+
+    if payment_term is not None:
+        _validate_integer_params(payment_term=payment_term)
+
     # The limiting age is one year beyond the last age in the table.
     omega = commutation_table.index[-1] + 1
 
@@ -146,6 +171,12 @@ def term_life_insurance(
     commutation_table: pd.DataFrame,
     deferral_period: int = 0,
 ) -> float:
+    _validate_integer_params(
+                current_age=current_age,
+                term=term,
+                deferral_period=deferral_period,
+    )
+
     # The limiting age is one year beyond the last age in the table.
     omega = commutation_table.index[-1] + 1
 
@@ -192,6 +223,11 @@ def whole_life_insurance(
     commutation_table: pd.DataFrame,
     deferral_period: int = 0,
 ) -> float:
+    _validate_integer_params(
+                current_age=current_age,
+                deferral_period=deferral_period,
+    )
+
     # The limiting age is one year beyond the last age in the table.
     omega = commutation_table.index[-1] + 1
 
