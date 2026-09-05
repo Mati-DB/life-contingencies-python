@@ -8,6 +8,37 @@ def _validate_integer_params(**params):
             raise TypeError(f"{display_name} must be an integer.")
 
 
+def _validate_current_age(
+    current_age: int,
+    commutation_table: pd.DataFrame,
+) -> None:
+    if current_age not in commutation_table.index:
+        raise ValueError(
+            "Current age must be a valid age in the commutation table."
+        )
+
+
+def _get_valid_deferred_age(
+    current_age: int,
+    deferral_period: int,
+    omega: int,
+) -> int:
+    if deferral_period < 0:
+        raise ValueError(
+            "Deferral period must be a non-negative integer."
+        )
+
+    deferred_age = current_age + deferral_period
+
+    if deferred_age >= omega:
+        raise ValueError(
+            "Deferred age must be lower than the mortality model's "
+            "terminal age."
+        )
+
+    return deferred_age
+
+
 def pure_endowment(
     current_age: int,
     term: int,
@@ -15,24 +46,22 @@ def pure_endowment(
 ) -> float:
     _validate_integer_params(current_age=current_age, term=term)
 
-    if current_age not in commutation_table.index:
-        raise ValueError(
-            "Current age must be a valid age in the commutation table."
-        )
+    _validate_current_age(current_age, commutation_table)
     current_Dx = commutation_table.loc[current_age, "Dx"]
 
     if term < 0:
         raise ValueError("Term must be a non-negative integer.")
 
     terminal_age = current_age + term
-    # The limiting age is one year beyond the last age in the table.
+    # The mortality model's terminal age is one year beyond the last
+    # table age.
     omega = commutation_table.index[-1] + 1
     if terminal_age > omega:
         raise ValueError(
-            "Terminal age cannot exceed the limiting age."
+            "Terminal age cannot exceed the mortality model's terminal age."
         )
 
-    # Commutation values are zero at the limiting age.
+    # Commutation values are zero at the mortality model's terminal age.
     if terminal_age == omega:
         terminal_Dx = 0
     else:
@@ -55,25 +84,18 @@ def life_annuity_due(
     if payment_term is not None:
         _validate_integer_params(payment_term=payment_term)
 
-    # The limiting age is one year beyond the last age in the table.
+    # The mortality model's terminal age is one year beyond the last
+    # table age.
     omega = commutation_table.index[-1] + 1
 
-    if current_age not in commutation_table.index:
-        raise ValueError(
-            "Current age must be a valid age in the commutation table."
-        )
+    _validate_current_age(current_age, commutation_table)
     current_Dx = commutation_table.loc[current_age, "Dx"]
 
-    if deferral_period < 0:
-        raise ValueError(
-            "Deferral period must be a non-negative integer."
-        )
-
-    deferred_age = current_age + deferral_period
-    if deferred_age >= omega:
-        raise ValueError(
-            "Deferred age must be lower than the limiting age."
-        )
+    deferred_age = _get_valid_deferred_age(
+        current_age,
+        deferral_period,
+        omega,
+    )
     deferred_Nx = commutation_table.loc[deferred_age, "Nx"]
 
     if payment_term is None:
@@ -87,10 +109,11 @@ def life_annuity_due(
         terminal_age = deferred_age + payment_term
         if terminal_age > omega:
             raise ValueError(
-                "Terminal age cannot exceed the limiting age."
+                "Terminal age cannot exceed the mortality model's terminal age"
+                "."
             )
 
-        # Commutation values are zero at the limiting age.
+        # Commutation values are zero at the mortality model's terminal age.
         if terminal_age == omega:
             terminal_Nx = 0
         else:
@@ -113,25 +136,18 @@ def life_annuity_immediate(
     if payment_term is not None:
         _validate_integer_params(payment_term=payment_term)
 
-    # The limiting age is one year beyond the last age in the table.
+    # The mortality model's terminal age is one year beyond the last
+    # table age.
     omega = commutation_table.index[-1] + 1
 
-    if current_age not in commutation_table.index:
-        raise ValueError(
-            "Current age must be a valid age in the commutation table."
-        )
+    _validate_current_age(current_age, commutation_table)
     current_Dx = commutation_table.loc[current_age, "Dx"]
 
-    if deferral_period < 0:
-        raise ValueError(
-            "Deferral period must be a non-negative integer."
-        )
-
-    deferred_age = current_age + deferral_period
-    if deferred_age >= omega:
-        raise ValueError(
-            "Deferred age must be lower than the limiting age."
-        )
+    deferred_age = _get_valid_deferred_age(
+            current_age,
+            deferral_period,
+            omega,
+    )
 
     # Annuity-immediate payments occur at the end of each period,
     # so Nx is evaluated one age later.
@@ -152,10 +168,12 @@ def life_annuity_immediate(
         terminal_age = deferred_age + payment_term
         if terminal_age > omega:
             raise ValueError(
-                "Terminal age cannot exceed the limiting age."
+                "Terminal age cannot exceed the mortality model's terminal age"
+                "."
             )
 
-        # Commutation values are zero at and beyond the limiting age.
+        # Commutation values are zero at and beyond the mortality
+        # model's terminal age.
         terminal_Nx_age = terminal_age + 1
         if terminal_Nx_age >= omega:
             terminal_Nx = 0
@@ -177,25 +195,18 @@ def term_life_insurance(
         deferral_period=deferral_period,
     )
 
-    # The limiting age is one year beyond the last age in the table.
+    # The mortality model's terminal age is one year beyond the last
+    # table age.
     omega = commutation_table.index[-1] + 1
 
-    if current_age not in commutation_table.index:
-        raise ValueError(
-            "Current age must be a valid age in the commutation table."
-        )
+    _validate_current_age(current_age, commutation_table)
     current_Dx = commutation_table.loc[current_age, "Dx"]
 
-    if deferral_period < 0:
-        raise ValueError(
-            "Deferral period must be a non-negative integer."
-        )
-
-    deferred_age = current_age + deferral_period
-    if deferred_age >= omega:
-        raise ValueError(
-            "Deferred age must be lower than the limiting age."
-        )
+    deferred_age = _get_valid_deferred_age(
+            current_age,
+            deferral_period,
+            omega,
+    )
     deferred_Mx = commutation_table.loc[deferred_age, "Mx"]
 
     if term <= 0:
@@ -206,10 +217,10 @@ def term_life_insurance(
     terminal_age = deferred_age + term
     if terminal_age > omega:
         raise ValueError(
-            "Terminal age cannot exceed the limiting age."
+            "Terminal age cannot exceed the mortality model's terminal age."
         )
 
-    # Commutation values are zero at the limiting age.
+    # Commutation values are zero at the mortality model's terminal age.
     if terminal_age == omega:
         terminal_Mx = 0
     else:
@@ -228,25 +239,18 @@ def whole_life_insurance(
         deferral_period=deferral_period,
     )
 
-    # The limiting age is one year beyond the last age in the table.
+    # The mortality model's terminal age is one year beyond the last
+    # table age.
     omega = commutation_table.index[-1] + 1
 
-    if current_age not in commutation_table.index:
-        raise ValueError(
-            "Current age must be a valid age in the commutation table."
-        )
+    _validate_current_age(current_age, commutation_table)
     current_Dx = commutation_table.loc[current_age, "Dx"]
 
-    if deferral_period < 0:
-        raise ValueError(
-            "Deferral period must be a non-negative integer."
-        )
-
-    deferred_age = current_age + deferral_period
-    if deferred_age >= omega:
-        raise ValueError(
-            "Deferred age must be lower than the limiting age."
-        )
+    deferred_age = _get_valid_deferred_age(
+            current_age,
+            deferral_period,
+            omega,
+    )
     deferred_Mx = commutation_table.loc[deferred_age, "Mx"]
 
     return float(deferred_Mx / current_Dx)
