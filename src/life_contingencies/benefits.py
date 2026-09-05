@@ -172,9 +172,9 @@ def term_life_insurance(
     deferral_period: int = 0,
 ) -> float:
     _validate_integer_params(
-                current_age=current_age,
-                term=term,
-                deferral_period=deferral_period,
+        current_age=current_age,
+        term=term,
+        deferral_period=deferral_period,
     )
 
     # The limiting age is one year beyond the last age in the table.
@@ -224,8 +224,8 @@ def whole_life_insurance(
     deferral_period: int = 0,
 ) -> float:
     _validate_integer_params(
-                current_age=current_age,
-                deferral_period=deferral_period,
+        current_age=current_age,
+        deferral_period=deferral_period,
     )
 
     # The limiting age is one year beyond the last age in the table.
