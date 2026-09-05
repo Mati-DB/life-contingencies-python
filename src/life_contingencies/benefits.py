@@ -23,8 +23,8 @@ def pure_endowment(
             "Terminal age cannot exceed the limiting age."
         )
 
+    # Commutation values are zero at the limiting age.
     if terminal_age == omega:
-        # Commutation values are zero at the limiting age.
         terminal_Dx = 0
     else:
         terminal_Dx = commutation_table.loc[current_age + term, "Dx"]
@@ -73,8 +73,8 @@ def life_annuity_due(
                 "Terminal age cannot exceed the limiting age."
             )
 
+        # Commutation values are zero at the limiting age.
         if terminal_age == omega:
-            # Commutation values are zero at the limiting age.
             terminal_Nx = 0
         else:
             terminal_Nx = commutation_table.loc[terminal_age, "Nx"]
@@ -142,7 +142,7 @@ def life_annuity_immediate(
 
 def term_life_insurance(
     current_age: int,
-    term: int | None,
+    term: int,
     commutation_table: pd.DataFrame,
     deferral_period: int = 0,
 ) -> float:
@@ -167,24 +167,50 @@ def term_life_insurance(
         )
     deferred_Mx = commutation_table.loc[deferred_age, "Mx"]
 
-    if term is None:
+    if term <= 0:
+        raise ValueError(
+            "Term must be a positive integer."
+        )
+
+    terminal_age = deferred_age + term
+    if terminal_age > omega:
+        raise ValueError(
+            "Terminal age cannot exceed the limiting age."
+        )
+
+    # Commutation values are zero at the limiting age.
+    if terminal_age == omega:
         terminal_Mx = 0
     else:
-        if term <= 0:
-            raise ValueError(
-                "Term must be a positive integer."
-            )
-
-        terminal_age = deferred_age + term
-        if terminal_age > omega:
-            raise ValueError(
-                "Terminal age cannot exceed the limiting age."
-            )
-
-        if terminal_age == omega:
-            # Commutation values are zero at the limiting age.
-            terminal_Mx = 0
-        else:
-            terminal_Mx = commutation_table.loc[terminal_age, "Mx"]
+        terminal_Mx = commutation_table.loc[terminal_age, "Mx"]
 
     return float((deferred_Mx - terminal_Mx) / current_Dx)
+
+
+def whole_life_insurance(
+    current_age: int,
+    commutation_table: pd.DataFrame,
+    deferral_period: int = 0,
+) -> float:
+    # The limiting age is one year beyond the last age in the table.
+    omega = commutation_table.index[-1] + 1
+
+    if current_age not in commutation_table.index:
+        raise ValueError(
+            "Current age must be a valid age in the commutation table."
+        )
+    current_Dx = commutation_table.loc[current_age, "Dx"]
+
+    if deferral_period < 0:
+        raise ValueError(
+            "Deferral period must be a non-negative integer."
+        )
+
+    deferred_age = current_age + deferral_period
+    if deferred_age >= omega:
+        raise ValueError(
+            "Deferred age must be lower than the limiting age."
+        )
+    deferred_Mx = commutation_table.loc[deferred_age, "Mx"]
+
+    return float(deferred_Mx / current_Dx)
