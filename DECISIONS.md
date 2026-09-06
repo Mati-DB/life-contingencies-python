@@ -12,11 +12,25 @@ Classes, design patterns, additional abstraction layers, or complex infrastructu
 
 The project should remain simple and readable while its scope is still limited.
 
-## 2. Project language
+## 2. Project language and terminology
 
 Source code, public APIs, module names, documentation, and repository content will be written in English.
 
 Actuarial terminology will follow standard English-language actuarial usage whenever possible rather than literal translations from Spanish.
+
+### Age terminology
+
+The mortality model boundary will be referred to as the `limiting age`
+(\(\omega\)).
+
+Contract-specific ages will use descriptive `start age` and `end age`
+terminology. More specific names will be preferred when they improve
+clarity, such as `coverage start age` and `coverage end age` for life
+insurance, `annuity start age` and `annuity end age` for annuities, and
+`maturity age` for benefits that mature at a specified age.
+
+The term `terminal age` will be avoided where it could be confused
+with the mortality model's limiting age.
 
 ## 3. Mortality data
 
