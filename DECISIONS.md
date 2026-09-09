@@ -12,6 +12,12 @@ Classes, design patterns, additional abstraction layers, or complex infrastructu
 
 The project should remain simple and readable while its scope is still limited.
 
+### Future direction
+
+The project may later support vectorized actuarial calculations for
+pandas- and NumPy-based portfolio valuation, when portfolio-level use
+cases justify the additional complexity.
+
 ## 2. Project language and terminology
 
 Source code, public APIs, module names, documentation, and repository content will be written in English.
