@@ -11,5 +11,8 @@ __pycache__/
 # Local experiments
 scratch/
 
+# Packaging
+*.egg-info/
+
 # VS Code
 .vscode/
